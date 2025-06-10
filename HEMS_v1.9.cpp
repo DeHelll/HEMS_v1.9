@@ -86,3 +86,24 @@ private:
 		}
 	}
 };
+
+
+class Appliance : public EnergyDevice 
+{
+public: 
+	Appliance(const std::string& name, double powerConsumption)
+				: EnergyDevice(name, powerConsumption) {}
+
+	void activate() override { isActive = true; }
+	void deactivate() override { isActive = false; }
+
+	void displayStatus() const override {
+		std::cout << "Appliance: " << name << ": "
+			<< (isActive ? "Running": "Off")<< ", "
+			<< "Power: " << (isActive ? powerConsumption : 0) << "W\n";}
+
+	double calculatePower() const override { return isActive ? powerConsumption : 0; }
+
+
+
+};
