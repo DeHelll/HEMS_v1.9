@@ -131,3 +131,24 @@ public:
 		else sunlevel = level; 
 	}
 };
+
+
+class House {
+	std::vector<std::shared_ptr<EnergyDevice>> devices;
+
+	std::shared_ptr<EnergyDevice> createDeviceByType(
+		const std::string& type,
+		const std::string& name,
+		double powerConsumption,
+		bool isActive = false)
+
+	{
+		if (type == "light") return std::make_shared<Light>(name, powerConsumption);
+		if (type == "termostat") return std::make_shared<Termostat>(name, powerConsumption);
+		if (type == "appliance") return std::make_shared<Appliance>(name, powerConsumption);
+		if (type == "solar") return std::make_shared<SolarPanel>(name, powerConsumption);
+		return nullptr;
+	}
+};
+
+public: 
