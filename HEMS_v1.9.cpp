@@ -50,3 +50,11 @@ public:
 	}
 };
 
+
+class Termostat : public EnergyDevice {
+	double currentTemp;
+	double targetTemp;
+	public: 
+		Termostat(const std::string& name, double powerConsumption, double currentTemp, double targetTemp, bool isActive = false)
+			: EnergyDevice(name, powerConsumption, isActive), currentTemp(currentTemp), targetTemp(targetTemp) {}
+
