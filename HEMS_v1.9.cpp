@@ -152,3 +152,7 @@ class House {
 };
 
 public: 
+	void readFile(const std::string& filename)
+	{
+	
+	}
