@@ -55,6 +55,16 @@ class Termostat : public EnergyDevice {
 	double currentTemp;
 	double targetTemp;
 	public: 
-		Termostat(const std::string& name, double powerConsumption, double currentTemp, double targetTemp, bool isActive = false)
-			: EnergyDevice(name, powerConsumption, isActive), currentTemp(currentTemp), targetTemp(targetTemp) {}
+		Termostat(const std::string& name, double powerConsumption, double currentTemp = 20.0, double targetTemp = 24.0,)
+			: EnergyDevice(name, powerConsumption), currentTemp(currentTemp), targetTemp(targetTemp) {}
 
+
+		void activate() override { isActive = true;}
+		void deactivate() override { isActive = false; }
+
+		void displayStatus() const override {
+			std::cout << "Termostat: " << name << ": "
+				<< (isActive ? "Heating" : "idle") << ", "
+				<< "Current Temp: " << currentTemp << "°C, "
+				<< "Target Temp: " << targetTemp << "°C, "
+				<< "power: " << (isActive ? powerConsumption : 0) << "W\n";
