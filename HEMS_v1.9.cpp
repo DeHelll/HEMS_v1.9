@@ -102,8 +102,32 @@ public:
 			<< (isActive ? "Running": "Off")<< ", "
 			<< "Power: " << (isActive ? powerConsumption : 0) << "W\n";}
 
-	double calculatePower() const override { return isActive ? powerConsumption : 0; }
+	double calculatePower() const override { return isActive ? powerConsumption : 0; }};
 
+class SolarPanel : public EnergyDevice {
+	double efficiency; // REMEMBER PRECENTAGE
+	double sunlevel; //also precentage
 
+public:
+	SolarPanel(const std::string& name, double maxOutput, double efficiency = 20.0)
+		:EnergyDevice(name, maxOutput), efficiency(efficiency), sunlevel(99.0) {}
 
+	void activate() override { isActive = true; }
+	void deactivate() override { isActive = false; }
+
+	void displayStatus() const override {
+		std::cout << "Solar " << name << "; "
+			<< (isActive ? "Generating" : "Idle") << ", "
+			<< "Output: " << calculatePower() << "W\n";
+	}
+
+	double calculatePower() const override {
+		return isActive ? powerConsumption * efficiency / 100.0 * sunlevel / 100.0 : 0; // and "()" if be some problems
+	}
+
+	void setsunlevel(double level) {
+		if (level < 0) sunlevel = 0;
+		else if (level > 100) sunlevel = 100:
+		else sunlevel = level; 
+	}
 };
