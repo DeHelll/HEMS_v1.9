@@ -54,17 +54,35 @@ public:
 class Termostat : public EnergyDevice {
 	double currentTemp;
 	double targetTemp;
-	public: 
-		Termostat(const std::string& name, double powerConsumption, double currentTemp = 20.0, double targetTemp = 24.0,)
-			: EnergyDevice(name, powerConsumption), currentTemp(currentTemp), targetTemp(targetTemp) {}
+public:
+	Termostat(const std::string& name, double powerConsumption, double currentTemp = 20.0, double targetTemp = 24.0)
+		: EnergyDevice(name, powerConsumption), currentTemp(currentTemp), targetTemp(targetTemp) {}
 
 
-		void activate() override { isActive = true;}
-		void deactivate() override { isActive = false; }
+	void activate() override { isActive = true; adjustTemp(); }
+	void deactivate() override { isActive = false; }
 
-		void displayStatus() const override {
-			std::cout << "Termostat: " << name << ": "
-				<< (isActive ? "Heating" : "idle") << ", "
-				<< "Current Temp: " << currentTemp << "°C, "
-				<< "Target Temp: " << targetTemp << "°C, "
-				<< "power: " << (isActive ? powerConsumption : 0) << "W\n";
+	void displayStatus() const override {
+		std::cout << "Termostat: " << name << ": "
+			<< (isActive ? "Heating" : "idle") << ", "
+			<< "Current Temp: " << currentTemp << "°C, "
+			<< "Target Temp: " << targetTemp << "°C, "
+			<< "power: " << (isActive ? powerConsumption : 0) << "W\n";
+	}
+
+	double calculatePower() const override {
+		return isActive ? powerConsumption : 0;
+	}
+
+	void setTarget(double temp) {
+		targetTemp = temp;
+		if (isActive) adjustTemp();
+	}
+
+private:
+	void adjustTemp() {
+		if (currentTemp < targetTemp) {
+			std::cout << name << " heating to " << targetTemp << "°C...\n";
+		}
+	}
+};
