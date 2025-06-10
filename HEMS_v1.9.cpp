@@ -1,20 +1,23 @@
-﻿// HEMS_v1.9.cpp : Этот файл содержит функцию "main". Здесь начинается и заканчивается выполнение программы.
-//
+﻿#include <iostream>
+#include <vector>
+#include <algorithm>
 
-#include <iostream>
 
-int main()
-{
-    std::cout << "Hello World!\n";
-}
+class EnergyDevice {
+protected:
+	std::string name;
+	double powerConsumption; // in watts
+	bool isActive;
 
-// Запуск программы: CTRL+F5 или меню "Отладка" > "Запуск без отладки"
-// Отладка программы: F5 или меню "Отладка" > "Запустить отладку"
+public:
+	EnergyDevice(const std::string& name, double powerConsumption, bool isActive = false)
+		: name(name), powerConsumption(powerConsumption), isActive(isActive) {}
 
-// Советы по началу работы 
-//   1. В окне обозревателя решений можно добавлять файлы и управлять ими.
-//   2. В окне Team Explorer можно подключиться к системе управления версиями.
-//   3. В окне "Выходные данные" можно просматривать выходные данные сборки и другие сообщения.
-//   4. В окне "Список ошибок" можно просматривать ошибки.
-//   5. Последовательно выберите пункты меню "Проект" > "Добавить новый элемент", чтобы создать файлы кода, или "Проект" > "Добавить существующий элемент", чтобы добавить в проект существующие файлы кода.
-//   6. Чтобы снова открыть этот проект позже, выберите пункты меню "Файл" > "Открыть" > "Проект" и выберите SLN-файл.
+	virtual void activate() = 0;
+	virtual void deactivate() = 0;
+	virtual void displayStatus() const = 0;
+	virtual double calculatePower() const = 0;
+	virtual ~EnergyDevice() {};
+	std::string getname() const { return name; }
+};
+
