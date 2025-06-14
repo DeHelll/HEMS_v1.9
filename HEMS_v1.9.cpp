@@ -51,11 +51,11 @@ public:
     }
 };
 
-class Termostat : public EnergyDevice {
+class Thermostat : public EnergyDevice {
     double currentTemp;
     double targetTemp;
 public:
-    Termostat(const std::string& name, double powerConsumption, double currentTemp = 20.0, double targetTemp = 24.0)
+    Thermostat(const std::string& name, double powerConsumption, double currentTemp = 20.0, double targetTemp = 24.0)
         : EnergyDevice(name, powerConsumption), currentTemp(currentTemp), targetTemp(targetTemp) {}
 
     void activate() override {
@@ -66,7 +66,7 @@ public:
     void deactivate() override { isActive = false; }
 
     void displayStatus() const override {
-        std::cout << "Termostat: " << name << ": "
+        std::cout << "Thermostat: " << name << ": "
             << (isActive ? "Heating" : "idle") << ", "
             << "Current Temp: " << currentTemp << "°C, "
             << "Target Temp: " << targetTemp << "°C, "
@@ -147,8 +147,8 @@ class House {
     {
         if (type == "light")
             return std::make_shared<Light>(name, powerConsumption, 100.0);
-        if (type == "termostat")
-            return std::make_shared<Termostat>(name, powerConsumption);
+        if (type == "thermostat")
+            return std::make_shared<Thermostat>(name, powerConsumption);
         if (type == "appliance")
             return std::make_shared<Appliance>(name, powerConsumption);
         if (type == "solar")
