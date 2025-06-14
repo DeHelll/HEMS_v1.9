@@ -1,0 +1,24 @@
+@Type: light
+@Name: Living Room Lights
+@Power: 60
+@State: active
+
+@Type: thermostat
+@Name: Central Heating
+@Power: 350
+@State: active
+
+@Type: appliance
+@Name: Refrigerator
+@Power: 150
+@State: active
+
+@Type: solar
+@Name: Roof Solar
+@Power: 1000
+@State: active
+
+@Type: smartoutlet
+@Name: Entertainment System
+@Power: 300
+@State: active
