@@ -1,5 +1,9 @@
 ﻿#include <iostream>
+#include <fstream>
+#include <sstream>
 #include <vector>
+#include <string>
+#include <memory>
 #include <algorithm>
 
 
@@ -127,7 +131,7 @@ public:
 
 	void setsunlevel(double level) {
 		if (level < 0) sunlevel = 0;
-		else if (level > 100) sunlevel = 100:
+		else if (level > 100) sunlevel = 100;
 		else sunlevel = level; 
 	}
 };
@@ -149,10 +153,58 @@ class House {
 		if (type == "solar") return std::make_shared<SolarPanel>(name, powerConsumption);
 		return nullptr;
 	}
-};
 
-public: 
+public:
 	void readFile(const std::string& filename)
 	{
-	
+		std::ifstream file(filename);
+		if (!file) {
+			std::cerr << "Can't read file. " << std::endl;
+			return;
+		}
+
+		std::string line, type, name, state;
+		double powerConsumption = 0.0;
+
+		while (std::getline(file, line))
+		{
+			if (line.rfind("@Type: ", 0) == 0)
+			{
+				type = line.substr(6);
+				type.erase(0, type.find_first_not_of(" \t\r\n"));
+				type.erase(type.find_last_not_of(" \t\r\n") + 1);
+			}
+			else if (line.rfind("@Name: ", 0) == 0)
+			{
+				name = line.substr(6);
+				type.erase(0, type.find_first_not_of(" \t\r\n"));
+				type.erase(type.find_last_not_of(" \t\r\n") + 1);
+			}
+			else if (line.rfind("@Power: ", 0) == 0)
+			{
+				powerConsumption = std::stood(line.substr(7));
+			}
+			else if (line.rfind("@State: ", 0) == 0)
+			{
+				name = line.substr(7);
+				type.erase(0, type.find_first_not_of(" \t\r\n"));
+				type.erase(type.find_last_not_of(" \t\r\n") + 1);
+
+				auto device = createDeviceByType(type, name, powerConsumption, state == "active");
+				
+				if (device)
+				{
+					if (state == "active") device->activate();
+					devices.push_back(device);
+				}
+			}
+		}
 	}
+
+
+
+
+
+
+
+};
