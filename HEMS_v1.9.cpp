@@ -180,10 +180,8 @@ public:
 				type.erase(0, type.find_first_not_of(" \t\r\n"));
 				type.erase(type.find_last_not_of(" \t\r\n") + 1);
 			}
-			else if (line.rfind("@Power: ", 0) == 0)
-			{
-				powerConsumption = std::stood(line.substr(7));
-			}
+
+			else if (line.rfind("@Power: ", 0) == 0) { powerConsumption = std::stod(line.substr(7)); }
 			else if (line.rfind("@State: ", 0) == 0)
 			{
 				name = line.substr(7);
@@ -191,7 +189,7 @@ public:
 				type.erase(type.find_last_not_of(" \t\r\n") + 1);
 
 				auto device = createDeviceByType(type, name, powerConsumption, state == "active");
-				
+
 				if (device)
 				{
 					if (state == "active") device->activate();
@@ -201,23 +199,26 @@ public:
 		}
 	}
 
-	void runInretSess() 
+	void runInretSess()
 	{
 		std::cout << "\nHouse Energy Management System\n"
 			<< "Tota; devices: " << devices.size() << "\n\n";
 
-		int index = 1; 
-		for (const auto& device : devices) { std::cout << index++ << ". "; device->displayStatus();}
+		int index = 1;
+		for (const auto& device : devices) { std::cout << index++ << ". "; device->displayStatus(); }
 
 		double totalPower = 0.0;
-		for(const auto& device : devices) {
+		for (const auto& device : devices) {
 			totalPower += device->calculatePower();
 		}
 		std::cout << "\n Total Power Usage : " << totalPower << "W\n";
+	}
 };
 
-	int main(){
+
+	int main() {
 		House myHouse;
 		myHouse.readFile("devices.txt");
 		myHouse.runInretSess();
 		return 0;
+	}
