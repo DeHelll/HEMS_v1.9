@@ -215,3 +215,9 @@ public:
 		}
 		std::cout << "\n Total Power Usage : " << totalPower << "W\n";
 };
+
+	int main(){
+		House myHouse;
+		myHouse.readFile("devices.txt");
+		myHouse.runInretSess();
+		return 0;
