@@ -201,10 +201,17 @@ public:
 		}
 	}
 
+	void runInretSess() 
+	{
+		std::cout << "\nHouse Energy Management System\n"
+			<< "Tota; devices: " << devices.size() << "\n\n";
 
+		int index = 1; 
+		for (const auto& device : devices) { std::cout << index++ << ". "; device->displayStatus();}
 
-
-
-
-
+		double totalPower = 0.0;
+		for(const auto& device : devices) {
+			totalPower += device->calculatePower();
+		}
+		std::cout << "\n Total Power Usage : " << totalPower << "W\n";
 };
