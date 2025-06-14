@@ -5,34 +5,23 @@
 #include <string>
 #include <memory>
 #include <algorithm>
-#include <iomanip>
 
 class EnergyDevice {
 protected:
     std::string name;
-    double powerConsumption; 
+    double powerConsumption; // in watts
     bool isActive;
 
 public:
     EnergyDevice(const std::string& name, double powerConsumption, bool isActive = false)
         : name(name), powerConsumption(powerConsumption), isActive(isActive) {}
 
-    virtual ~EnergyDevice() = default;
-
-    //core functionality
-    virtual void togglePower(bool on) { isActive = on;}
-    virtual void activate() {togglePower(true);}
-    virtual void deactivate() { togglePower(false); }
-
-    //status and power calculation
+    virtual void activate() = 0;
+    virtual void deactivate() = 0;
     virtual void displayStatus() const = 0;
     virtual double calculatePower() const = 0;
-    virtual double getNetEn() const { return calculatePower() * 1.0; }
-    
-    virtual void updateH() {}
-    //getters
+    virtual ~EnergyDevice() {};
     std::string getname() const { return name; }
-    bool isDeviceActive() const { return isActive; }
 };
 
 class Light : public EnergyDevice {
@@ -40,6 +29,9 @@ class Light : public EnergyDevice {
 public:
     Light(const std::string& name, double powerConsumption, double brightness, bool isActive = false)
         : EnergyDevice(name, powerConsumption, isActive), brightness(brightness) {}
+
+    void activate() override { isActive = true; }
+    void deactivate() override { isActive = false; }
 
     void displayStatus() const override {
         std::cout << "Light: " << name << ": "
@@ -59,12 +51,19 @@ public:
     }
 };
 
-class Thermostat : public EnergyDevice {
+class Termostat : public EnergyDevice {
     double currentTemp;
     double targetTemp;
 public:
-    Thermostat(const std::string& name, double powerConsumption, double currentTemp = 20.0, double targetTemp = 24.0)
+    Termostat(const std::string& name, double powerConsumption, double currentTemp = 20.0, double targetTemp = 24.0)
         : EnergyDevice(name, powerConsumption), currentTemp(currentTemp), targetTemp(targetTemp) {}
+
+    void activate() override {
+        isActive = true;
+        adjustTemp();
+    }
+
+    void deactivate() override { isActive = false; }
 
     void displayStatus() const override {
         std::cout << "Termostat: " << name << ": "
@@ -81,12 +80,6 @@ public:
     void setTarget(double temp) {
         targetTemp = temp;
         if (isActive) adjustTemp();
-    }
-
-    void updateH() override {
-        if (isActive && currentTemp < targetTemp) {
-            currentTemp = std::min(currentTemp + 2.0, targetTemp);
-        }
     }
 
 private:
@@ -117,12 +110,15 @@ public:
 };
 
 class SolarPanel : public EnergyDevice {
-    double efficiency; 
-    double sunlevel;
+    double efficiency; // Percentage
+    double sunlevel;   // Percentage
 
 public:
     SolarPanel(const std::string& name, double maxOutput, double efficiency = 20.0)
-        : EnergyDevice(name, maxOutput), efficiency(efficiency), sunlevel(100.0) {}
+        : EnergyDevice(name, maxOutput), efficiency(efficiency), sunlevel(99.0) {}
+
+    void activate() override { isActive = true; }
+    void deactivate() override { isActive = false; }
 
     void displayStatus() const override {
         std::cout << "Solar " << name << ": "
@@ -134,96 +130,11 @@ public:
         return isActive ? powerConsumption * (efficiency / 100.0) * (sunlevel / 100.0) : 0;
     }
 
-    double getNetEn() const override { return -calculatePower() * 1; }
-
     void setsunlevel(double level) {
         if (level < 0) sunlevel = 0;
         else if (level > 100) sunlevel = 100;
         else sunlevel = level;
     }
-};
-
-class SmartOutlet : public Appliance {
-    double totalPower;
-
-
-public:
-    SmartOutlet(const std::string& name, double powerConsumption)
-        : Appliance(name, powerConsumption), totalPower(0.0) {};
-
-    void updateH() override {
-        if (isActive) {
-            totalPower += calculatePower() * 1;
-        }
-    }
-
-    void displayStatus() const override {
-        std::cout << "Smart Outlet: " << name << ": "
-            << (isActive ? "Running" : "Off") << ", "
-            << "Total Power: " << totalPower << "W\n";
-    }
-
-    void resetTotalPower() { totalPower = 0.0; }
-};
-
-class BatteryStorage : public EnergyDevice {
-public:
-    enum class Mode { Idle, Charging, Discharging };
-
-private:
-    double capacityWh;
-    double currentChargeWh;
-    double maxChargeRateW;
-    double maxDischargeRateW;
-    Mode currentMode;
-
-public:
-    BatteryStorage(const std::string& name, double capacity, double maxChargeRate, double maxDischargeRate, double initialCharge = 0.0)
-        : EnergyDevice(name, 0.0), capacityWh(capacity),currentChargeWh(initialCharge),maxChargeRateW(maxChargeRate),maxDischargeRateW(maxDischargeRate),currentMode(Mode::Idle) {}
-
-    void setMode(Mode mode) { currentMode = mode; }
-    void activate() override { currentMode = Mode::Discharging; }
-    void deactivate() override { currentMode = Mode::Idle; }
-
-    void displayStatus() const override {
-        std::string modeStr;
-        switch (currentMode) {
-            case Mode::Charging: modeStr = "Charging"; break;
-            case Mode::Discharging: modeStr = "Discharging"; break;
-            default: modeStr = "Idle"; break;
-        }
-
-        std::cout << "Battery: " << name << ": " << modeStr
-                  << ", Charge: " << std::fixed << std::setprecision(1)
-                  << currentChargeWh << "Wh/" << capacityWh << "Wh ("
-                  << (currentChargeWh / capacityWh) * 100 << "%)\n";
-    }
-
-    double calculatePower() const override {
-        switch (currentMode) {
-            case Mode::Charging: return maxChargeRateW;
-            case Mode::Discharging: return -maxDischargeRateW;
-            default: return 0;
-        }
-    }
-
-    void updateH() override {
-        switch (currentMode) {
-            case Mode::Charging:
-                currentChargeWh = std::min(currentChargeWh + maxChargeRateW, capacityWh);
-                break;
-            case Mode::Discharging:
-                currentChargeWh = std::max(currentChargeWh - maxDischargeRateW, 0.0);
-                break;
-            default: break;
-        }
-    }
-
-    double getNetEn() const override {
-        return calculatePower();  
-    }
-
-    double getChargeLevel() const { return currentChargeWh; }
 };
 
 class House {
@@ -237,7 +148,7 @@ class House {
         if (type == "light")
             return std::make_shared<Light>(name, powerConsumption, 100.0);
         if (type == "termostat")
-            return std::make_shared<Thermostat>(name, powerConsumption);
+            return std::make_shared<Termostat>(name, powerConsumption);
         if (type == "appliance")
             return std::make_shared<Appliance>(name, powerConsumption);
         if (type == "solar")
@@ -246,10 +157,6 @@ class House {
     }
 
 public:
-    void addDevice(const std::shared_ptr<EnergyDevice>& device) {
-        devices.push_back(device);
-    }
-
     void readFile(const std::string& filename) {
         std::ifstream file(filename);
         if (!file) {
@@ -292,78 +199,27 @@ public:
         }
     }
 
-    void simulateHour() {
-        for (auto& device : devices) {
-            device->updateH();
-        }
-    }
+    void runInterSess() {
+        std::cout << "\nHouse Energy Management System\n"
+            << "Total devices: " << devices.size() << "\n\n";
 
-    double calculateTotalPower() const {
+        int index = 1;
+        for (const auto& device : devices) {
+            std::cout << index++ << ". ";
+            device->displayStatus();
+        }
+
         double totalPower = 0.0;
         for (const auto& device : devices) {
             totalPower += device->calculatePower();
         }
-        return totalPower;
+        std::cout << "\nTotal Power Usage: " << totalPower << "W\n";
     }
-
-    double calculateCost(double buyRate, double sellRate) const {
-        double netEnergy = calculateTotalPower();
-        double netKWh = netEnergy / 1000.0;
-
-        if (netKWh > 0) {
-            return netKWh * buyRate;
-        }
-        else {
-            return -netKWh * sellRate;
-        }
-    }
-        void runInterSess() {
-            std::cout << "\nHouse Energy Management System\n"
-                << "Total devices: " << devices.size() << "\n\n";
-
-            int index = 1;
-            for (const auto& device : devices) {
-                std::cout << index++ << ". ";
-                device->displayStatus();
-            }
-
-            double totalPower = 0.0;
-            for (const auto& device : devices) {
-                totalPower += device->calculatePower();
-            }
-            std::cout << "\nTotal Power Usage: " << std::fixed << std::setprecision(0) << totalPower << "W\n";
-
-
-            simulateHour();
-
-            const double buyRate = 0.15;
-            const double sellRate = 0.05;
-
-            double netEnergy = calculateTotalPower();
-            double cost = calculateCost(buyRate, sellRate);
-
-            std::cout << "\nAfter 1 hour simulation: \n";
-
-
-            std::cout << "Net Energy: " << std::fixed << std::setprecision(0) << netEnergy << "Wh ("
-                << std::fixed << std::setprecision(1) << netEnergy / 1000.0 << " kWh)\n";
-
-
-            std::cout << "Estimated Cost: $" << std::fixed << std::setprecision(2) << cost
-                << " (" << (cost > 0 ? "Paid" : "Earned") << ")\n";
-
-
-        }
-    };
+};
 
 int main() {
     House myHouse;
     myHouse.readFile("devices.txt");
-
-    auto battery = std::make_shared<BatteryStorage>("Home Battery", 5000, 1000, 1500, 500);
-    battery->activate();
-    myHouse.addDevice(battery);
-
     myHouse.runInterSess();
     return 0;
 }
